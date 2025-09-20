@@ -12,6 +12,11 @@ const playerSchema = new mongoose.Schema({
     min: 0,
     max: 54
   },
+  gender: {
+    type: String,
+    enum: ['male', 'female'],
+    required: true
+  },
   category: {
     type: String,
     enum: ['A', 'B', 'C'],

@@ -21,7 +21,7 @@ router.post('/', async (req, res) => {
   try {
     const { competition, player, holes, playingHandicap } = req.body;
     
-    // Get course data for calculations
+    // Get course data and player data for calculations
     const competitionData = await require('../models/Competition')
       .findById(competition)
       .populate('course');
@@ -29,9 +29,15 @@ router.post('/', async (req, res) => {
     if (!competitionData) {
       return res.status(404).json({ error: 'Competition not found' });
     }
+
+    // Get player data to determine gender
+    const playerData = await require('../models/Player').findById(player);
+    if (!playerData) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
     
-    // Process scorecard with Stableford calculations
-    const processedHoles = processScorecard(holes, playingHandicap, competitionData.course.holes);
+    // Process scorecard with Stableford calculations using player gender
+    const processedHoles = processScorecard(holes, playingHandicap, competitionData.course.holes, playerData.gender);
     
     // Find existing score or create new one
     let score = await Score.findOne({ competition, player });
@@ -62,14 +68,14 @@ router.put('/:id', async (req, res) => {
     const score = await Score.findById(req.params.id).populate({
       path: 'competition',
       populate: { path: 'course' }
-    });
+    }).populate('player');
     
     if (!score) {
       return res.status(404).json({ error: 'Score not found' });
     }
     
-    // Process scorecard with updated data
-    const processedHoles = processScorecard(holes, playingHandicap, score.competition.course.holes);
+    // Process scorecard with updated data using player gender
+    const processedHoles = processScorecard(holes, playingHandicap, score.competition.course.holes, score.player.gender);
     
     score.holes = processedHoles;
     score.lastUpdated = new Date();

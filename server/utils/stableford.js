@@ -42,15 +42,20 @@ function calculateNetStrokes(grossStrokes, playingHandicap, strokeIndex) {
 /**
  * Process a complete scorecard
  */
-function processScorecard(holes, playingHandicap, courseHoles) {
+function processScorecard(holes, playingHandicap, courseHoles, playerGender = 'male') {
   return holes.map(hole => {
     const courseHole = courseHoles.find(ch => ch.number === hole.hole);
     if (!courseHole) throw new Error(`Course hole ${hole.hole} not found`);
     
+    // Use correct stroke index based on player gender
+    const strokeIndex = playerGender === 'female' 
+      ? courseHole.strokeIndexLadies 
+      : courseHole.strokeIndexMen;
+    
     const netStrokes = calculateNetStrokes(
       hole.strokes, 
       playingHandicap, 
-      courseHole.strokeIndexMen // TODO: Support ladies tees
+      strokeIndex
     );
     
     const stablefordPoints = calculateStablefordPoints(netStrokes, courseHole.par);
@@ -58,7 +63,7 @@ function processScorecard(holes, playingHandicap, courseHoles) {
     return {
       ...hole,
       par: courseHole.par,
-      strokeIndex: courseHole.strokeIndexMen,
+      strokeIndex,
       playingHandicap,
       netStrokes,
       stablefordPoints
