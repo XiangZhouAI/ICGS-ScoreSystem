@@ -1,0 +1,114 @@
+🎯 Vibe Coding Prompt: Golf Competition Management and Scoring App
+
+We are building a full-stack web application for golf competition management. The app will be used by organizers on laptops to manage player data, calculate scores, and display results on a connected 4K big screen.
+
+The development process will follow a multi-role, iterative workflow:
+	•	PM (Product Manager): clarifies requirements, prioritizes, sets acceptance criteria.
+	•	UX Designer: creates wireframes, layouts, and visual guidelines.
+	•	Developer (Frontend, Backend, Full-stack): implements features.
+	•	QA: tests against requirements, raises questions, and requests adjustments.
+	•	PM Sign-Off: confirms readiness before moving to the next cycle.
+
+After each QA phase, the process must pause and ask questions before continuing to the next iteration.
+
+⸻
+
+📘 Project Overview
+
+Title: Golf Competition Management and Scoring Application
+Objective: Streamline competition setup, scoring, and prize-giving with accurate calculations and a high-visibility results screen.
+
+⸻
+
+⚙️ Functional Requirements
+	1.	Player & Handicap Management
+	•	Preload player names and handicaps.
+	•	Add, edit, or delete player information.
+	2.	Course Configuration
+	•	Input and save par + separate male/female stroke indexes for all 18 holes.
+	•	Save configurations for reuse.
+	3.	Dynamic Handicap Categories
+	•	Automatically divide players into three roughly equal categories based on handicap.
+	4.	Score Entry
+	•	Organizer-friendly interface for quick stroke entry per hole.
+	•	Accuracy and speed are top priorities.
+	5.	Stableford Calculation
+Updated scoring logic:
+	•	-4 → 6 pts
+	•	-3 → 5 pts
+	•	-2 → 4 pts
+	•	-1 → 3 pts
+	•	Par → 2 pts
+	•	+1 → 1 pt
+	•	+2 or worse → 0 pts
+	6.	Rule-based Prize Engine
+	•	Most birdies, most bogeys, most scratch holes.
+	•	Lowest cumulative score on Par 3s.
+	•	Best individual hole score.
+	•	Extensible for new prize rules.
+	7.	Data Management
+	•	Export results to CSV.
+	•	Generate PDF summary of competition results.
+
+⸻
+
+🌐 Non-Functional Requirements
+	•	User Experience: Simple, organizer-first workflows.
+	•	Performance: Instant calculations & display updates.
+	•	Design & Aesthetics:
+	•	Blue-based color palette (derived from society logo).
+	•	Presentation screen optimized for 4K (3840x2160).
+	•	Text must be legible from 4–10 meters away.
+	•	Areas for society logo + up to 7 sponsor logos.
+	•	Reliability: Stable, prevents data loss.
+	•	Deployment: Runs locally on laptops (React + Node.js + MongoDB stack assumed).
+
+⸻
+
+🛠️ Vibe Coding Process (Iteration-based)
+
+Phase 1: Product Management (PM) ✍️
+	•	Review PRD with stakeholders.
+	•	Identify core flows:
+	•	Player & Course Setup
+	•	Score Entry
+	•	Results Display
+	•	Mark extended flows: Prize engine, CSV/PDF exports.
+	•	Define acceptance criteria (e.g., Stableford calculation must be 100% correct, presentation must be clear on 4K).
+
+Phase 2: UX Design 🎨
+	•	Create wireframes for:
+	•	Player/Handicap Management (table/grid).
+	•	Course Setup (18-hole input grid, male/female indexes).
+	•	Scoring Entry (spreadsheet-like, fast keyboard entry).
+	•	Results Presentation (large text, flexible logo slots).
+	•	Apply blue-based palette inspired by society logo.
+
+Phase 3: Development 💻
+	•	Frontend (React): Build UI from UX mockups.
+	•	Backend (Node + MongoDB):
+	•	Player & course data storage.
+	•	Stableford + prize calculation logic.
+	•	Export services (CSV, PDF).
+	•	Full-stack integration: Ensure smooth data flow and correct API connections.
+
+Phase 4: Quality Assurance ✅
+	•	Verify scoring accuracy with test datasets.
+	•	Test handicap category splitting.
+	•	Check 4K presentation screen readability.
+	•	Validate CSV and PDF export formatting.
+	•	Pause to ask PM for clarifications before continuing.
+
+Phase 5: PM Sign-Off 🏁
+	•	Review completed features against requirements.
+	•	Approve or request adjustments before moving forward.
+
+⸻
+
+🚦 Instructions for Vibe Coding
+	•	Always simulate roles separately (PM → UX → Dev → QA → PM).
+	•	After QA, stop, test, and ask clarifying questions before next iteration.
+	•	Continue until all requirements are met, then deliver a final sign-off version.
+
+
+Very important :  Do not fuckin change anything I did not ask for Just do only what I fuckin told you
