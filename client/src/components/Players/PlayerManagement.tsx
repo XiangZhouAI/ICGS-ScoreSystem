@@ -14,7 +14,12 @@ interface Player {
 }
 
 export const PlayerManagement: React.FC = () => {
-  const [players, setPlayers] = useState<Player[]>([]);
+  // Load players from localStorage on component mount
+  const [players, setPlayers] = useState<Player[]>(() => {
+    const savedPlayers = localStorage.getItem('icgs-players');
+    return savedPlayers ? JSON.parse(savedPlayers) : [];
+  });
+  
   const [showAddForm, setShowAddForm] = useState(false);
   const [newPlayer, setNewPlayer] = useState<Omit<Player, 'id' | 'category'>>({
     name: '',
@@ -23,6 +28,11 @@ export const PlayerManagement: React.FC = () => {
     email: '',
     phone: '',
   });
+
+  // Save players to localStorage whenever players array changes
+  React.useEffect(() => {
+    localStorage.setItem('icgs-players', JSON.stringify(players));
+  }, [players]);
 
   const calculateCategory = (handicap: number): 'A' | 'B' | 'C' => {
     if (handicap <= 9) return 'A';
@@ -48,31 +58,45 @@ export const PlayerManagement: React.FC = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        const csv = e.target?.result as string;
-        const lines = csv.split('\n').filter(line => line.trim());
-        const headers = lines[0].toLowerCase().split(',');
-        
-        const importedPlayers: Player[] = lines.slice(1).map((line, index) => {
-          const values = line.split(',');
-          const name = values[headers.indexOf('name')] || `Player ${index + 1}`;
-          const handicap = parseInt(values[headers.indexOf('handicap')] || '18');
-          const gender = (values[headers.indexOf('gender')] || 'male') as 'male' | 'female';
+        try {
+          const csv = e.target?.result as string;
+          const lines = csv.split('\n').filter(line => line.trim());
           
-          return {
-            id: (Date.now() + index).toString(),
-            name: name.trim(),
-            handicap: Math.max(0, Math.min(54, handicap)),
-            gender,
-            category: calculateCategory(handicap),
-            email: values[headers.indexOf('email')]?.trim() || '',
-            phone: values[headers.indexOf('phone')]?.trim() || '',
-          };
-        });
-        
-        setPlayers([...players, ...importedPlayers]);
+          if (lines.length < 2) {
+            alert('CSV file must have at least a header row and one data row');
+            return;
+          }
+          
+          const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
+          
+          const importedPlayers: Player[] = lines.slice(1).map((line, index) => {
+            const values = line.split(',').map(v => v.trim());
+            const name = values[headers.indexOf('name')] || `Player ${index + 1}`;
+            const handicap = parseInt(values[headers.indexOf('handicap')] || '18');
+            const gender = (values[headers.indexOf('gender')] || 'male') as 'male' | 'female';
+            
+            return {
+              id: (Date.now() + index).toString(),
+              name: name.trim(),
+              handicap: Math.max(0, Math.min(54, handicap)),
+              gender: gender === 'female' ? 'female' : 'male',
+              category: calculateCategory(handicap),
+              email: values[headers.indexOf('email')] || '',
+              phone: values[headers.indexOf('phone')] || '',
+            };
+          });
+          
+          setPlayers([...players, ...importedPlayers]);
+          alert(`Successfully imported ${importedPlayers.length} players!`);
+        } catch (error) {
+          alert('Error reading CSV file. Please check the format.');
+          console.error('CSV Import Error:', error);
+        }
       };
       reader.readAsText(file);
     }
+    // Reset the file input
+    event.target.value = '';
   };
 
   const removePlayer = (id: string) => {
@@ -127,6 +151,20 @@ export const PlayerManagement: React.FC = () => {
           >
             💾 Export CSV
           </Button>
+
+          {players.length > 0 && (
+            <Button 
+              onClick={() => {
+                if (window.confirm(`Are you sure you want to remove all ${players.length} players?`)) {
+                  setPlayers([]);
+                }
+              }}
+              variant="danger"
+              size="small"
+            >
+              🗑️ Clear All
+            </Button>
+          )}
         </div>
 
         {showAddForm && (
