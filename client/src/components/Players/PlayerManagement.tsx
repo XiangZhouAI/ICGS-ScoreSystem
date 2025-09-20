@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 import { Button } from '../Common/Button';
 import { Card } from '../Common/Card';
 import { theme } from '../../theme';
+import { calculateCategory } from '../../utils/categoryUtils';
 
 interface Player {
   id?: string;
   name: string;
   handicap: number;
   gender: 'male' | 'female';
-  category: 'A' | 'B' | 'C';
   email?: string;
   phone?: string;
+  // Note: category is now calculated dynamically, not stored
 }
 
 export const PlayerManagement: React.FC = () => {
@@ -21,7 +22,7 @@ export const PlayerManagement: React.FC = () => {
   });
   
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newPlayer, setNewPlayer] = useState<Omit<Player, 'id' | 'category'>>({
+  const [newPlayer, setNewPlayer] = useState<Omit<Player, 'id'>>({
     name: '',
     handicap: 0,
     gender: 'male',
@@ -34,18 +35,13 @@ export const PlayerManagement: React.FC = () => {
     localStorage.setItem('icgs-players', JSON.stringify(players));
   }, [players]);
 
-  const calculateCategory = (handicap: number): 'A' | 'B' | 'C' => {
-    if (handicap <= 9) return 'A';
-    if (handicap <= 15) return 'B';
-    return 'C';
-  };
 
   const handleAddPlayer = () => {
     if (newPlayer.name && newPlayer.handicap >= 0) {
       const player: Player = {
         ...newPlayer,
         id: Date.now().toString(),
-        category: calculateCategory(newPlayer.handicap),
+        // category is calculated dynamically, not stored
       };
       setPlayers([...players, player]);
       setNewPlayer({ name: '', handicap: 0, gender: 'male', email: '', phone: '' });
@@ -80,7 +76,7 @@ export const PlayerManagement: React.FC = () => {
               name: name.trim(),
               handicap: Math.max(0, Math.min(54, handicap)),
               gender: gender === 'female' ? 'female' : 'male',
-              category: calculateCategory(handicap),
+              // category is calculated dynamically, not stored
               email: values[headers.indexOf('email')] || '',
               phone: values[headers.indexOf('phone')] || '',
             };
@@ -290,7 +286,7 @@ export const PlayerManagement: React.FC = () => {
                       fontWeight: 'bold',
                       color: theme.colors.primary,
                     }}>
-                      {player.category}
+                      {calculateCategory(player.handicap)}
                     </td>
                     <td style={{ padding: theme.spacing.sm, fontSize: theme.typography.organizer.small }}>
                       {player.email && <div>📧 {player.email}</div>}

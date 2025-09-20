@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Card } from '../Common/Card';
 import { Button } from '../Common/Button';
 import { theme } from '../../theme';
+import { calculateCategory } from '../../utils/categoryUtils';
 
 interface Player {
   id: string;
@@ -308,7 +309,7 @@ export const ScoringEntry: React.FC = () => {
                 const csv = ['Player,Handicap,Gender,Category,' + COURSE_DATA.map(h => `H${h.hole}`).join(',') + ',Total Score,Total Points']
                   .concat(playerScores.map(ps => {
                     const player = players.find(p => p.id === ps.playerId)!;
-                    return `${player.name},${player.handicap},${player.gender},${player.category},${ps.scores.join(',')},${ps.totalScore},${ps.totalPoints}`;
+                    return `${player.name},${player.handicap},${player.gender},${calculateCategory(player.handicap)},${ps.scores.join(',')},${ps.totalScore},${ps.totalPoints}`;
                   }))
                   .join('\n');
                 const blob = new Blob([csv], { type: 'text/csv' });
@@ -406,7 +407,6 @@ export const ScoringEntry: React.FC = () => {
                       <th style={{ padding: theme.spacing.sm, textAlign: 'center', minWidth: '70px' }}>B9 Pts</th>
                       <th style={{ padding: theme.spacing.sm, textAlign: 'center', minWidth: '80px' }}>Total Strokes</th>
                       <th style={{ padding: theme.spacing.sm, textAlign: 'center', minWidth: '80px' }}>Total Points</th>
-                      <th style={{ padding: theme.spacing.sm, textAlign: 'center', minWidth: '60px' }}>Pos</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -430,7 +430,7 @@ export const ScoringEntry: React.FC = () => {
                             }}>
                               {player.name}
                               <div style={{ fontSize: theme.typography.organizer.small, color: theme.colors.darkGray }}>
-                                {player.gender === 'male' ? '♂️' : '♀️'} Cat {player.category}
+                                {player.gender === 'male' ? '♂️' : '♀️'} Cat {calculateCategory(player.handicap)}
                               </div>
                             </td>
                             <td style={{ padding: theme.spacing.sm, textAlign: 'center', fontWeight: 'bold' }}>
@@ -572,15 +572,6 @@ export const ScoringEntry: React.FC = () => {
                               fontSize: theme.typography.organizer.h3,
                             }}>
                               {playerScore.totalPoints}
-                            </td>
-                            <td style={{ 
-                              padding: theme.spacing.sm, 
-                              textAlign: 'center',
-                              fontWeight: 'bold',
-                              color: playerIndex === 0 ? theme.colors.success : theme.colors.darkGray,
-                              fontSize: theme.typography.organizer.h3,
-                            }}>
-                              {playerIndex + 1}
                             </td>
                           </tr>
                           

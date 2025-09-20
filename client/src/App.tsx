@@ -4,11 +4,13 @@ import { PlayerManagement } from './components/Players/PlayerManagement';
 import { CourseSetup } from './components/Course/CourseSetup';
 import { ScoringEntry } from './components/Scoring/ScoringEntry';
 import { ResultsDisplay } from './components/Results/ResultsDisplay';
+import { PhotoGallery } from './components/Gallery/PhotoGallery';
+import { SponsorsDisplay } from './components/Common/SponsorsDisplay';
 import { Button } from './components/Common/Button';
 import { Card } from './components/Common/Card';
 import { theme } from './theme';
 
-type ActiveView = 'dashboard' | 'players' | 'course' | 'scoring' | 'results';
+type ActiveView = 'dashboard' | 'players' | 'course' | 'scoring' | 'results' | 'gallery' | 'sponsors';
 
 function App() {
   const [activeView, setActiveView] = useState<ActiveView>('dashboard');
@@ -23,6 +25,27 @@ function App() {
         return <ScoringEntry />;
       case 'results':
         return <ResultsDisplay />;
+      case 'gallery':
+        return <PhotoGallery />;
+      case 'sponsors':
+        return (
+          <div style={{
+            minHeight: '100vh',
+            background: `linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.primaryDark} 100%)`,
+            padding: theme.spacing.xl,
+          }}>
+            <h1 style={{ 
+              fontSize: theme.typography.display4K.hero, 
+              color: theme.colors.white,
+              textAlign: 'center',
+              marginBottom: theme.spacing.xxl,
+              textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+            }}>
+              Tournament Sponsors
+            </h1>
+            <SponsorsDisplay variant="grid" showTitle={false} />
+          </div>
+        );
       default:
         return <Dashboard onNavigate={setActiveView} />;
     }
@@ -81,6 +104,20 @@ function App() {
           >
             Results
           </Button>
+          <Button 
+            variant={activeView === 'gallery' ? 'primary' : 'secondary'} 
+            size="small"
+            onClick={() => setActiveView('gallery')}
+          >
+            Gallery
+          </Button>
+          <Button 
+            variant={activeView === 'sponsors' ? 'primary' : 'secondary'} 
+            size="small"
+            onClick={() => setActiveView('sponsors')}
+          >
+            Sponsors
+          </Button>
         </nav>
       )}
 
@@ -134,6 +171,24 @@ const Dashboard: React.FC<{ onNavigate: (view: ActiveView) => void }> = ({ onNav
         </p>
         <Button onClick={() => onNavigate('results')}>
           View Results
+        </Button>
+      </Card>
+
+      <Card title="📸 Photo Gallery">
+        <p style={{ margin: `0 0 ${theme.spacing.md} 0`, color: theme.colors.darkGray }}>
+          Slideshow of tournament photos and memories collected throughout the years.
+        </p>
+        <Button onClick={() => onNavigate('gallery')}>
+          View Gallery
+        </Button>
+      </Card>
+
+      <Card title="🤝 Our Sponsors">
+        <p style={{ margin: `0 0 ${theme.spacing.md} 0`, color: theme.colors.darkGray }}>
+          Meet the generous sponsors who make our tournaments possible.
+        </p>
+        <Button onClick={() => onNavigate('sponsors')}>
+          View Sponsors
         </Button>
       </Card>
 

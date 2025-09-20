@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { theme } from '../../theme';
+import { SponsorsDisplay } from '../Common/SponsorsDisplay';
+import { calculateCategory } from '../../utils/categoryUtils';
 
 interface Player {
   id: string;
@@ -277,9 +279,9 @@ export const ResultsDisplay: React.FC = () => {
   };
 
   const resultsByCategory = {
-    A: results.filter(r => r.player.category === 'A'),
-    B: results.filter(r => r.player.category === 'B'),
-    C: results.filter(r => r.player.category === 'C'),
+    A: results.filter(r => calculateCategory(r.player.handicap) === 'A'),
+    B: results.filter(r => calculateCategory(r.player.handicap) === 'B'),
+    C: results.filter(r => calculateCategory(r.player.handicap) === 'C'),
   };
 
   const getTrophyEmoji = (position: number) => {
@@ -480,7 +482,7 @@ export const ResultsDisplay: React.FC = () => {
                     fontSize: theme.typography.display4K.small,
                     opacity: 0.8,
                   }}>
-                    {result.player.gender === 'male' ? '♂️' : '♀️'} HC {result.player.handicap} | Cat {result.player.category}
+                    {result.player.gender === 'male' ? '♂️' : '♀️'} HC {result.player.handicap} | Cat {calculateCategory(result.player.handicap)}
                   </div>
                 </div>
                 
@@ -617,6 +619,11 @@ export const ResultsDisplay: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* Sponsors Banner */}
+      <div style={{ marginTop: theme.spacing.xxl }}>
+        <SponsorsDisplay variant="banner" />
+      </div>
 
       <div style={{
         position: 'fixed',

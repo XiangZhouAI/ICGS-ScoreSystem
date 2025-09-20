@@ -2,6 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '../Common/Card';
 import { Button } from '../Common/Button';
 import { theme } from '../../theme';
+import { 
+  CategoryRanges, 
+  getCategoryRanges, 
+  saveCategoryRanges, 
+  validateCategoryRanges,
+  getCategoryDistribution,
+  calculateCategory
+} from '../../utils/categoryUtils';
 
 interface CourseHole {
   number: number;
@@ -61,6 +69,23 @@ export const CourseSetup: React.FC = () => {
   const [course, setCourse] = useState<Course>(LUTTRELLSTOWN_COURSE);
   const [selectedTees, setSelectedTees] = useState<'blue' | 'white' | 'green' | 'red'>('white');
   const [showDetails, setShowDetails] = useState(false);
+  const [categoryRanges, setCategoryRanges] = useState<CategoryRanges>(getCategoryRanges());
+  const [players, setPlayers] = useState<Array<{
+    name: ReactNode; handicap: number; category?: 'A' | 'B' | 'C' 
+}>>([]);
+
+  // Load players for category distribution
+  useEffect(() => {
+    const savedPlayers = localStorage.getItem('icgs-players');
+    if (savedPlayers) {
+      try {
+        const parsedPlayers = JSON.parse(savedPlayers);
+        setPlayers(parsedPlayers);
+      } catch (error) {
+        console.error('Error loading players:', error);
+      }
+    }
+  }, []);
 
   // Calculate totals
   const frontNine = course.holes.slice(0, 9);
@@ -313,6 +338,289 @@ export const CourseSetup: React.FC = () => {
           </div>
         </Card>
       )}
+
+      {/* Category Configuration */}
+      <Card title="🏌️ Player Category Configuration">
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: theme.spacing.xl,
+        }}>
+          {/* Current Ranges */}
+          <div>
+            <h3 style={{ color: theme.colors.primary, margin: `0 0 ${theme.spacing.md} 0` }}>
+              Current Category Ranges
+            </h3>
+            <div style={{ 
+              backgroundColor: theme.colors.lightGray, 
+              padding: theme.spacing.md, 
+              borderRadius: '8px',
+              marginBottom: theme.spacing.md,
+            }}>
+              <div style={{ marginBottom: theme.spacing.sm }}>
+                <strong>Category A:</strong> Handicap {categoryRanges.A.min}-{categoryRanges.A.max}
+              </div>
+              <div style={{ marginBottom: theme.spacing.sm }}>
+                <strong>Category B:</strong> Handicap {categoryRanges.B.min}-{categoryRanges.B.max}
+              </div>
+              <div>
+                <strong>Category C:</strong> Handicap {categoryRanges.C.min}-{categoryRanges.C.max}
+              </div>
+            </div>
+
+            {/* Player Distribution */}
+            {players.length > 0 && (
+              <div>
+                <h4 style={{ color: theme.colors.primary, margin: `0 0 ${theme.spacing.sm} 0` }}>
+                  Current Player Distribution
+                </h4>
+                <div style={{ fontSize: theme.typography.organizer.body }}>
+                  {(() => {
+                    const distribution = getCategoryDistribution(players);
+                    return (
+                      <div>
+                        <div>
+                          <strong>Category A:</strong> {distribution.A} players
+                          {distribution.A > 0 && (
+                            <div style={{ fontSize: theme.typography.organizer.small, color: theme.colors.darkGray, marginLeft: theme.spacing.sm }}>
+                              (HC {categoryRanges.A.min}-{categoryRanges.A.max})
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <strong>Category B:</strong> {distribution.B} players
+                          {distribution.B > 0 && (
+                            <div style={{ fontSize: theme.typography.organizer.small, color: theme.colors.darkGray, marginLeft: theme.spacing.sm }}>
+                              (HC {categoryRanges.B.min}-{categoryRanges.B.max})
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <strong>Category C:</strong> {distribution.C} players
+                          {distribution.C > 0 && (
+                            <div style={{ fontSize: theme.typography.organizer.small, color: theme.colors.darkGray, marginLeft: theme.spacing.sm }}>
+                              (HC {categoryRanges.C.min}-{categoryRanges.C.max})
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ marginTop: theme.spacing.sm, fontWeight: 'bold' }}>
+                          Total: {distribution.total} players
+                        </div>
+                        
+                        {/* Show actual player details for debugging */}
+                        {players.length > 0 && players.length <= 10 && (
+                          <div style={{ 
+                            marginTop: theme.spacing.sm, 
+                            fontSize: theme.typography.organizer.small,
+                            backgroundColor: '#f0f8ff',
+                            padding: theme.spacing.sm,
+                            borderRadius: '4px',
+                          }}>
+                            <div style={{ fontWeight: 'bold', marginBottom: theme.spacing.xs }}>
+                              Player Details:
+                            </div>
+                            {players.map((player, index) => {
+                              const calculatedCategory = calculateCategory(player.handicap);
+                              return (
+                                <div key={index}>
+                                  {player.name} (HC {player.handicap}) → Cat {calculatedCategory}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Configuration Form */}
+          <div>
+            <h3 style={{ color: theme.colors.primary, margin: `0 0 ${theme.spacing.md} 0` }}>
+              Modify Category Ranges
+            </h3>
+            <div style={{ 
+              display: 'grid', 
+              gap: theme.spacing.md,
+            }}>
+              {/* Category A */}
+              <div>
+                <label style={{ display: 'block', marginBottom: theme.spacing.xs, fontWeight: '600' }}>
+                  Category A (Low Handicap)
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.sm }}>
+                  <input
+                    type="number"
+                    value={categoryRanges.A.min}
+                    onChange={(e) => setCategoryRanges(prev => ({
+                      ...prev,
+                      A: { ...prev.A, min: parseInt(e.target.value) || 0 }
+                    }))}
+                    style={{
+                      width: '80px',
+                      padding: theme.spacing.xs,
+                      border: `1px solid ${theme.colors.darkGray}`,
+                      borderRadius: '4px',
+                    }}
+                    min="0"
+                    max="54"
+                  />
+                  <span>to</span>
+                  <input
+                    type="number"
+                    value={categoryRanges.A.max}
+                    onChange={(e) => setCategoryRanges(prev => ({
+                      ...prev,
+                      A: { ...prev.A, max: parseInt(e.target.value) || 0 }
+                    }))}
+                    style={{
+                      width: '80px',
+                      padding: theme.spacing.xs,
+                      border: `1px solid ${theme.colors.darkGray}`,
+                      borderRadius: '4px',
+                    }}
+                    min="0"
+                    max="54"
+                  />
+                </div>
+              </div>
+
+              {/* Category B */}
+              <div>
+                <label style={{ display: 'block', marginBottom: theme.spacing.xs, fontWeight: '600' }}>
+                  Category B (Medium Handicap)
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.sm }}>
+                  <input
+                    type="number"
+                    value={categoryRanges.B.min}
+                    onChange={(e) => setCategoryRanges(prev => ({
+                      ...prev,
+                      B: { ...prev.B, min: parseInt(e.target.value) || 0 }
+                    }))}
+                    style={{
+                      width: '80px',
+                      padding: theme.spacing.xs,
+                      border: `1px solid ${theme.colors.darkGray}`,
+                      borderRadius: '4px',
+                    }}
+                    min="0"
+                    max="54"
+                  />
+                  <span>to</span>
+                  <input
+                    type="number"
+                    value={categoryRanges.B.max}
+                    onChange={(e) => setCategoryRanges(prev => ({
+                      ...prev,
+                      B: { ...prev.B, max: parseInt(e.target.value) || 0 }
+                    }))}
+                    style={{
+                      width: '80px',
+                      padding: theme.spacing.xs,
+                      border: `1px solid ${theme.colors.darkGray}`,
+                      borderRadius: '4px',
+                    }}
+                    min="0"
+                    max="54"
+                  />
+                </div>
+              </div>
+
+              {/* Category C */}
+              <div>
+                <label style={{ display: 'block', marginBottom: theme.spacing.xs, fontWeight: '600' }}>
+                  Category C (High Handicap)
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.sm }}>
+                  <input
+                    type="number"
+                    value={categoryRanges.C.min}
+                    onChange={(e) => setCategoryRanges(prev => ({
+                      ...prev,
+                      C: { ...prev.C, min: parseInt(e.target.value) || 0 }
+                    }))}
+                    style={{
+                      width: '80px',
+                      padding: theme.spacing.xs,
+                      border: `1px solid ${theme.colors.darkGray}`,
+                      borderRadius: '4px',
+                    }}
+                    min="0"
+                    max="54"
+                  />
+                  <span>to</span>
+                  <input
+                    type="number"
+                    value={categoryRanges.C.max}
+                    onChange={(e) => setCategoryRanges(prev => ({
+                      ...prev,
+                      C: { ...prev.C, max: parseInt(e.target.value) || 0 }
+                    }))}
+                    style={{
+                      width: '80px',
+                      padding: theme.spacing.xs,
+                      border: `1px solid ${theme.colors.darkGray}`,
+                      borderRadius: '4px',
+                    }}
+                    min="0"
+                    max="54"
+                  />
+                </div>
+              </div>
+
+              {/* Validation and Save */}
+              <div style={{ marginTop: theme.spacing.md }}>
+                {(() => {
+                  const errors = validateCategoryRanges(categoryRanges);
+                  if (errors.length > 0) {
+                    return (
+                      <div style={{ 
+                        color: theme.colors.warning, 
+                        fontSize: theme.typography.organizer.small,
+                        marginBottom: theme.spacing.sm,
+                      }}>
+                        {errors.map((error, index) => (
+                          <div key={index}>⚠️ {error}</div>
+                        ))}
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+                
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    const errors = validateCategoryRanges(categoryRanges);
+                    if (errors.length === 0) {
+                      saveCategoryRanges(categoryRanges);
+                      // Reload players to reflect new categories
+                      const savedPlayers = localStorage.getItem('icgs-players');
+                      if (savedPlayers) {
+                        try {
+                          const parsedPlayers = JSON.parse(savedPlayers);
+                          setPlayers(parsedPlayers);
+                        } catch (error) {
+                          console.error('Error reloading players:', error);
+                        }
+                      }
+                    } else {
+                      alert('Please fix validation errors before saving.');
+                    }
+                  }}
+                  disabled={validateCategoryRanges(categoryRanges).length > 0}
+                >
+                  Save Category Ranges
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
     </div>
   );
 };
