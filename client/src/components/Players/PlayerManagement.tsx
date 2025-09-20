@@ -59,7 +59,7 @@ export const PlayerManagement: React.FC = () => {
           const gender = (values[headers.indexOf('gender')] || 'male') as 'male' | 'female';
           
           return {
-            id: Date.now() + index,
+            id: (Date.now() + index).toString(),
             name: name.trim(),
             handicap: Math.max(0, Math.min(54, handicap)),
             gender,
