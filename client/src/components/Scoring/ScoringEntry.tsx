@@ -416,17 +416,19 @@ export const ScoringEntry: React.FC = () => {
                       return (
                         <React.Fragment key={playerScore.playerId}>
                           {/* Score Row */}
-                          <tr style={{ 
+                          <tr style={{
                             backgroundColor: playerIndex % 2 === 0 ? theme.colors.white : theme.colors.lightGray,
                             borderBottom: `1px solid ${theme.colors.darkGray}`,
+                            borderTop: `3px solid ${theme.colors.primary}`,
                           }}>
-                            <td style={{ 
-                              padding: theme.spacing.sm, 
+                            <td style={{
+                              padding: theme.spacing.sm,
                               fontWeight: 'bold',
                               position: 'sticky',
                               left: 0,
                               backgroundColor: playerIndex % 2 === 0 ? theme.colors.white : theme.colors.lightGray,
-                              borderRight: `2px solid ${theme.colors.darkGray}`,
+                              borderRight: `3px solid ${theme.colors.primary}`,
+                              borderLeft: `4px solid ${theme.colors.primary}`,
                             }}>
                               {player.name}
                               <div style={{ fontSize: theme.typography.organizer.small, color: theme.colors.darkGray }}>
@@ -576,38 +578,40 @@ export const ScoringEntry: React.FC = () => {
                           </tr>
                           
                           {/* Points Row */}
-                          <tr style={{ 
+                          <tr style={{
                             backgroundColor: playerIndex % 2 === 0 ? '#f0f8ff' : '#e6f3ff',
-                            borderBottom: `2px solid ${theme.colors.lightGray}`,
+                            borderBottom: `4px solid ${theme.colors.primary}`,
                           }}>
-                            <td style={{ 
-                              padding: `${theme.spacing.xs} ${theme.spacing.sm}`, 
+                            <td style={{
+                              padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
                               fontSize: theme.typography.organizer.small,
                               color: theme.colors.darkGray,
                               position: 'sticky',
                               left: 0,
                               backgroundColor: playerIndex % 2 === 0 ? '#f0f8ff' : '#e6f3ff',
-                              borderRight: `2px solid ${theme.colors.darkGray}`,
+                              borderRight: `3px solid ${theme.colors.primary}`,
+                              borderLeft: `4px solid ${theme.colors.primary}`,
                             }}>
                               Points
                             </td>
                             <td></td>
                             {COURSE_DATA.map((hole, holeIndex) => {
-                              const strokeIndex = player.gender === 'female' ? hole.strokeIndexLadies : hole.strokeIndexMen;
+                              // Use the same player from the current playerScore
+                              const currentPlayer = players.find(p => p.id === playerScore.playerId)!;
+                              const strokeIndex = currentPlayer.gender === 'female' ? hole.strokeIndexLadies : hole.strokeIndexMen;
                               const strokesReceived = playerScore.playingHandicap >= strokeIndex ? 1 : 0;
                               const additionalStrokes = playerScore.playingHandicap > 18 ? Math.floor((playerScore.playingHandicap - strokeIndex) / 18) : 0;
                               const totalStrokesReceived = strokesReceived + additionalStrokes;
                               const actualScore = playerScore.scores[holeIndex];
-                              const holeScore = actualScore !== undefined && actualScore !== null ? actualScore : hole.par;
                               const holePoints = (actualScore !== undefined && actualScore !== null) ? calculateStablefordPoints(actualScore, hole.par, totalStrokesReceived) : 0;
-                              
+
                               return (
-                                <td key={hole.hole} style={{ 
-                                  padding: '4px', 
+                                <td key={hole.hole} style={{
+                                  padding: '4px',
                                   textAlign: 'center',
                                   fontWeight: 'bold',
-                                  color: holePoints >= 4 ? theme.colors.success : 
-                                         holePoints >= 2 ? theme.colors.info : 
+                                  color: holePoints >= 4 ? theme.colors.success :
+                                         holePoints >= 2 ? theme.colors.info :
                                          holePoints === 1 ? theme.colors.warning : theme.colors.darkGray,
                                   backgroundColor: currentHole === hole.hole ? theme.colors.info : 'transparent',
                                 }}>

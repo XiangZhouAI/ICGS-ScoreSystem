@@ -6,11 +6,13 @@ import { ScoringEntry } from './components/Scoring/ScoringEntry';
 import { ResultsDisplay } from './components/Results/ResultsDisplay';
 import { PhotoGallery } from './components/Gallery/PhotoGallery';
 import { SponsorsDisplay } from './components/Common/SponsorsDisplay';
+import WinnersPreview from './components/Winners/WinnersPreview';
+import WinnersDisplay from './components/Winners/WinnersDisplay';
 import { Button } from './components/Common/Button';
 import { Card } from './components/Common/Card';
 import { theme } from './theme';
 
-type ActiveView = 'dashboard' | 'players' | 'course' | 'scoring' | 'results' | 'gallery' | 'sponsors';
+type ActiveView = 'dashboard' | 'players' | 'course' | 'scoring' | 'results' | 'gallery' | 'sponsors' | 'winners-preview' | 'winners-display';
 
 function App() {
   const [activeView, setActiveView] = useState<ActiveView>('dashboard');
@@ -34,8 +36,8 @@ function App() {
             background: `linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.primaryDark} 100%)`,
             padding: theme.spacing.xl,
           }}>
-            <h1 style={{ 
-              fontSize: theme.typography.display4K.hero, 
+            <h1 style={{
+              fontSize: theme.typography.display4K.hero,
               color: theme.colors.white,
               textAlign: 'center',
               marginBottom: theme.spacing.xxl,
@@ -46,6 +48,10 @@ function App() {
             <SponsorsDisplay variant="grid" showTitle={false} />
           </div>
         );
+      case 'winners-preview':
+        return <WinnersPreview />;
+      case 'winners-display':
+        return <WinnersDisplay />;
       default:
         return <Dashboard onNavigate={setActiveView} />;
     }
@@ -111,12 +117,26 @@ function App() {
           >
             Gallery
           </Button>
-          <Button 
-            variant={activeView === 'sponsors' ? 'primary' : 'secondary'} 
+          <Button
+            variant={activeView === 'sponsors' ? 'primary' : 'secondary'}
             size="small"
             onClick={() => setActiveView('sponsors')}
           >
             Sponsors
+          </Button>
+          <Button
+            variant={activeView === 'winners-preview' ? 'primary' : 'secondary'}
+            size="small"
+            onClick={() => setActiveView('winners-preview')}
+          >
+            Winners Preview
+          </Button>
+          <Button
+            variant={activeView === 'winners-display' ? 'primary' : 'secondary'}
+            size="small"
+            onClick={() => setActiveView('winners-display')}
+          >
+            Winners 4K
           </Button>
         </nav>
       )}
@@ -189,6 +209,24 @@ const Dashboard: React.FC<{ onNavigate: (view: ActiveView) => void }> = ({ onNav
         </p>
         <Button onClick={() => onNavigate('sponsors')}>
           View Sponsors
+        </Button>
+      </Card>
+
+      <Card title="🏆 Winners Preview">
+        <p style={{ margin: `0 0 ${theme.spacing.md} 0`, color: theme.colors.darkGray }}>
+          Review and modify prize winners before final display. Manual override capability.
+        </p>
+        <Button onClick={() => onNavigate('winners-preview')}>
+          Preview Winners
+        </Button>
+      </Card>
+
+      <Card title="🎉 Winners Display">
+        <p style={{ margin: `0 0 ${theme.spacing.md} 0`, color: theme.colors.darkGray }}>
+          4K-optimized winners display for award ceremony with sponsor recognition.
+        </p>
+        <Button onClick={() => onNavigate('winners-display')}>
+          Awards Ceremony
         </Button>
       </Card>
 
